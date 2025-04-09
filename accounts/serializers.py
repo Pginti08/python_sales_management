@@ -1,4 +1,7 @@
 from rest_framework import serializers
+
+from common_country_module.models import Country
+from common_country_module.serializers import CountrySerializer
 from .models import Category, SalesUser
 from django.contrib.auth import authenticate, get_user_model
 
@@ -12,14 +15,19 @@ class SignupSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     name = serializers.CharField(required=True)
     phone = serializers.CharField(required=True)
-    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), required=True)
+    country = serializers.PrimaryKeyRelatedField(queryset=Country.objects.all(), required=True)
 
     class Meta:
         model = SalesUser
-        fields = ['email', 'name', 'phone', 'category', 'password']
+        fields = ['email', 'name', 'phone', 'country', 'password', 'address']
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+    def validate_email(self, value):
+        if SalesUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
 
     def create(self, validated_data):
         user = SalesUser.objects.create_user(
@@ -53,3 +61,12 @@ class LoginSerializer(serializers.Serializer):
 
         data['user'] = user
         return data
+
+class ProfileSerializer(serializers.ModelSerializer):
+    country = CountrySerializer(read_only=True)
+
+    class Meta:
+        model = SalesUser
+        fields = ['id', 'name', 'email', 'phone', 'country', 'address', 'role']
+        read_only_fields = ['id', 'email', 'role']
+

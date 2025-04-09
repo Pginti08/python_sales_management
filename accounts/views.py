@@ -1,15 +1,16 @@
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import status
+from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Category
+from .models import Category, SalesUser
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import CategorySerializer, SignupSerializer, LoginSerializer  # make sure this exists
+from .serializers import CategorySerializer, SignupSerializer, LoginSerializer, \
+    ProfileSerializer  # make sure this exists
 
 @csrf_exempt
 @api_view(['GET', 'POST'])
@@ -116,3 +117,19 @@ class ResetPasswordView(APIView):
         user.save()
 
         return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
+
+
+# -----------------------------
+# ✅ View to Retrieve, Update, and Delete Business Detail by ID
+# -----------------------------
+class SalesUserProfileRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    # Use the same serializer
+    serializer_class = ProfileSerializer
+
+    # Only logged-in users can access this view
+    permission_classes = [permissions.IsAuthenticated]
+
+    # Again, filter the queryset so users can only access their own data
+    def get_object(self):
+        # This returns only the current authenticated user instance
+        return self.request.user

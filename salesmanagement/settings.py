@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'accounts',
     'businessdetails',
     'clients',
+    'common_country_module',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
