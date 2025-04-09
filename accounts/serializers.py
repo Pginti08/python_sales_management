@@ -16,7 +16,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SalesUser
-        fields = ['username', 'email', 'name', 'phone', 'category', 'password']
+        fields = ['email', 'name', 'phone', 'category', 'password']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -33,8 +33,6 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(
         write_only=True,
         required=True,
-        min_length=5,
-        max_length=10,
         error_messages={
             "blank": "Password cannot be empty.",
             "min_length": "Password too short.",
