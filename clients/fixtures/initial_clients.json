@@ -1,0 +1,24 @@
+[
+  {
+    "model": "clients.client",
+    "pk": 1,
+    "fields": {
+      "user": 4,
+      "name": "Client One",
+      "address": "mohali 328",
+      "email": "client1@example.com",
+      "phone": "9999999999"
+    }
+  },
+  {
+    "model": "clients.client",
+    "pk": 2,
+    "fields": {
+      "user": 4,
+      "name": "Client Two",
+      "address": "mohali tower",
+      "email": "client2@example.com",
+      "phone": "8888888888"
+    }
+  }
+]
