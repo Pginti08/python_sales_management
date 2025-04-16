@@ -1,0 +1,28 @@
+[
+  {
+    "model": "businessdetails.businessdetail",
+    "pk": 1,
+    "fields": {
+      "user": 12,
+      "business_name": "TechSavvy Solutions",
+      "team_size": 1,
+      "website": "https://techsavvy.example.com",
+      "phone": "+1234567890",
+      "country": 1,
+      "gstin": "techsavvy@example.com"
+    }
+  },
+  {
+    "model": "businessdetails.businessdetail",
+    "pk": 2,
+    "fields": {
+      "user": 11,
+      "business_name": "GreenField Ventures",
+      "team_size": 2,
+      "website": "https://greenfield.example.com",
+      "phone": "+1987654321",
+      "country": 2,
+      "gstin": "greenfield@example.com"
+    }
+  }
+]

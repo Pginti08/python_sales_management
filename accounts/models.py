@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-
+from common_country_module.models import Country
 # Category Table
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -35,8 +35,9 @@ class SalesUser(AbstractBaseUser, PermissionsMixin):
 
     name = models.CharField(max_length=100, default="Unknown")
     email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=15, blank=True, null=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    phone = models.CharField(max_length=15,default="Unknown")
+    country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True)
+    address = models.TextField(default="Unknown")
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
 
     is_active = models.BooleanField(default=True)
