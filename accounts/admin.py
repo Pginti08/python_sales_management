@@ -5,16 +5,13 @@ from django.contrib.auth.admin import UserAdmin
 class SalesUserAdmin(UserAdmin):
     model = SalesUser
 
-    def category_display(self, obj):
-        if obj.category:
-            return f"{obj.category.name} (ID: {obj.category.id})"
-        return "-"
 
-    category_display.short_description = 'Category (ID)'
-    list_display = ['email', 'name', 'phone', 'category_display', 'is_staff', 'role']
+
+
+    list_display = ['email', 'name', 'phone', 'is_staff', 'role']
     ordering = ['email']
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('name', 'phone', 'category')}),
+        (None, {'fields': ('name', 'phone')}),
     )
     add_fieldsets = (
         (None, {

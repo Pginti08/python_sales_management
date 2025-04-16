@@ -1,25 +1,41 @@
 # Importing generic views and permission classes from DRF
-from rest_framework import generics, permissions
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import generics, permissions, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.db import IntegrityError
 
 # Importing the BusinessDetail model and its serializer
-from businessdetails.models import BusinessDetail
-from businessdetails.serializers import BusinessDetailSerializer
+from businessdetails.models import BusinessDetail, TeamSize
+from businessdetails.serializers import BusinessDetailSerializer, TeamSizeSerializer
 
+
+@csrf_exempt
+@api_view(['GET', 'POST'])
+def team_size_create(request):
+    if request.method == 'GET':
+        categories = TeamSize.objects.all()
+        serializer = TeamSizeSerializer(categories, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = TeamSizeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
 
 class BusinessDetailListCreateView(generics.ListCreateAPIView):
-    # Serializer used to convert model instances to JSON and vice versa
     serializer_class = BusinessDetailSerializer
-
     permission_classes = [permissions.IsAuthenticated]
 
-    # Define the queryset (what data to show)
     def get_queryset(self):
-        # Only return the business details for the currently logged-in user
         return BusinessDetail.objects.filter(user=self.request.user)
 
-    # Define what happens when creating a new BusinessDetail (POST request)
+    def create(self, request, *args, **kwargs):
+         return super().create(request, *args, **kwargs)
+
     def perform_create(self, serializer):
-        # Automatically assign the currently logged-in user to the user field
         serializer.save(user=self.request.user)
 
 

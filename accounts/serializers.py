@@ -15,6 +15,7 @@ class SignupSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     name = serializers.CharField(required=True)
     phone = serializers.CharField(required=True)
+    address = serializers.CharField(required=True)
     country = serializers.PrimaryKeyRelatedField(queryset=Country.objects.all(), required=True)
 
     class Meta:
@@ -63,10 +64,10 @@ class LoginSerializer(serializers.Serializer):
         return data
 
 class ProfileSerializer(serializers.ModelSerializer):
-    country = CountrySerializer(read_only=True)
+    country = CountrySerializer()
 
     class Meta:
         model = SalesUser
-        fields = ['id', 'name', 'email', 'phone', 'country', 'address', 'role']
+        fields = ['id', 'name', 'email', 'phone', 'country', 'address']
         read_only_fields = ['id', 'email', 'role']
 

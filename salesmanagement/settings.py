@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'businessdetails',
     'clients',
     'common_country_module',
-]
+    'invoice',
+    'bankdetails'
+    ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
