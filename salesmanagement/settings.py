@@ -91,8 +91,8 @@ DATABASES = {
         'NAME': 'salesdb',
         'USER': 'vyzion',
         'PASSWORD': 'vyzion123',
-        'HOST': 'https://api.vyzioninnovations.com',
-        'PORT': '5432',
+        'HOST': '127.0.0.1',
+        'PORT': '8000',
     }
 }
 
