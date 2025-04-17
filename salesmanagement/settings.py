@@ -88,9 +88,9 @@ WSGI_APPLICATION = 'salesmanagement.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sales',
-        'USER': 'vyzionuser',
-        'PASSWORD': '3tSfE7VMUaQ4yFrL',
+        'NAME': 'salesdb',
+        'USER': 'vyzion',
+        'PASSWORD': 'vyzion123',
         # 'HOST': 'localhost',
         'PORT': '5432',
     }
