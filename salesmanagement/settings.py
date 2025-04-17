@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-9$#f8@tc!iezu%deh%*3p4204s%2&rdt!=u+x+5v95rj%48nww
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [ "api.vyzioninnovations.com",
+    "127.0.0.1",
+    "localhost",]
 
 
 # Application definition
@@ -112,6 +114,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://api.vyzioninnovations.com",
 ]
 
 
