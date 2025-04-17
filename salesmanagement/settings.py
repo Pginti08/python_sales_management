@@ -91,7 +91,7 @@ DATABASES = {
         'NAME': 'salesdb',
         'USER': 'vyzion',
         'PASSWORD': 'vyzion123',
-        'HOST': '127.0.0.1',
+        # 'HOST': 'localhost',
         'PORT': '8000',
     }
 }
