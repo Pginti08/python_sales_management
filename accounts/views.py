@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from .models import Category, SalesUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import CategorySerializer, SignupSerializer, LoginSerializer, \
-    ProfileSerializer  # make sure this exists
+    ProfileSerializer, LogoutSerializer  # make sure this exists
 
 @csrf_exempt
 @api_view(['GET', 'POST'])
@@ -118,7 +118,15 @@ class ResetPasswordView(APIView):
 
         return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
 
+class LogoutAPIView(generics.GenericAPIView):
+    serializer_class = LogoutSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 # -----------------------------
 # ✅ View to Retrieve, Update, and Delete Business Detail by ID
 # -----------------------------
