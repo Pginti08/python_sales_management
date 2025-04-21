@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'clients',
     'common_country_module',
     'invoice',
-    'bankdetails'
+    'bankdetails',
     'corsheaders',
     ]
 REST_FRAMEWORK = {
