@@ -6,5 +6,5 @@ from .models import  BusinessDetail
 
 @admin.register(BusinessDetail)
 class BusinessDetailAdmin(admin.ModelAdmin):
-    list_display = ('user', 'company_name', 'email', 'phone', 'address')
+    list_display = ('user', 'business_name', 'team_size', 'phone', 'country')
     search_fields = ('business_category', 'code')
