@@ -50,13 +50,11 @@ class LoginSerializer(serializers.Serializer):
     )
 
     def validate(self, data):
-        """Authenticate user using email instead of username."""
         email = data.get("email")
         password = data.get("password")
 
-        # if email and password:
         user = authenticate(request=self.context.get('request'),
-                                email=email, password=password)
+                            email=email, password=password)
 
         if not user:
             raise serializers.ValidationError({'error': 'Unable to log in with provided credentials.'})
@@ -73,16 +71,3 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'email', 'role']
 
 
-class LogoutSerializer(serializers.Serializer):
-    refresh = serializers.CharField()
-
-    def validate(self, attrs):
-        self.token = attrs['refresh']
-        return attrs
-
-    def save(self, **kwargs):
-        try:
-            refresh_token = RefreshToken(self.token)
-            refresh_token.blacklist()
-        except TokenError:
-            self.fail('bad_token')

@@ -1,21 +1,60 @@
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from rest_framework import status, generics, permissions
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Category
 from .serializers import (
     CategorySerializer,
     SignupSerializer,
     LoginSerializer,
-    ProfileSerializer,
-    LogoutSerializer
+    ProfileSerializer
 )
 
 User = get_user_model()
+
+# -----------------------------
+# ✅ Signup View (Refactored)
+# -----------------------------
+class SignupView(generics.CreateAPIView):
+    serializer_class = SignupSerializer
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
+
+
+# -----------------------------
+# ✅ Login View (JWT based)
+# -----------------------------
+@api_view(['POST'])
+def login_view(request):
+    serializer = LoginSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.validated_data['user']
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access_token': str(refresh.access_token),
+            'refresh_token': str(refresh),
+            'id': user.id,
+            'email': user.email,
+            'name': user.name
+        })
+    return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+
+
+# -----------------------------
+# ✅ Logout View (Clears client-side tokens only)
+# -----------------------------
+@api_view(['POST'])
+def logout_view(request):
+    # Simply tell the frontend to delete tokens
+    return Response({'message': 'Logout successful. Please clear tokens client-side.'}, status=status.HTTP_200_OK)
+
 
 # -----------------------------
 # ✅ Category List & Create
@@ -26,46 +65,7 @@ class CategoryListCreateView(generics.ListCreateAPIView):
 
 
 # -----------------------------
-# ✅ Signup View
-# -----------------------------
-class SignupView(generics.GenericAPIView):
-    serializer_class = SignupSerializer
-
-    def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# -----------------------------
-# ✅ Login View
-# -----------------------------
-class LoginView(generics.GenericAPIView):
-    serializer_class = LoginSerializer
-
-    def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
-            refresh = RefreshToken.for_user(user)
-
-            return Response({
-                'data': {
-                    'access_token': str(refresh.access_token),
-                    'refresh_token': str(refresh),
-                    'id': user.id,
-                    'email': user.email,
-                    'name': user.name
-                }
-            }, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
-
-
-# -----------------------------
-# ✅ Send Reset Email
+# ✅ Send Password Reset Email
 # -----------------------------
 class SendResetEmailView(APIView):
     def post(self, request):
@@ -78,7 +78,7 @@ class SendResetEmailView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        reset_link = f"http://localhost:8000/reset-password-form?email={email}"
+        reset_link = f"https://api.vyzioninnovations.com/reset-password-form?email={email}"
 
         send_mail(
             subject="Reset your password",
@@ -91,7 +91,7 @@ class SendResetEmailView(APIView):
 
 
 # -----------------------------
-# ✅ Reset Password via Email
+# ✅ Reset Password via Email (No login required)
 # -----------------------------
 class ResetPasswordByEmailView(APIView):
     def post(self, request):
@@ -113,7 +113,7 @@ class ResetPasswordByEmailView(APIView):
 
 
 # -----------------------------
-# ✅ Authenticated Password Change
+# ✅ Change Password (Authenticated)
 # -----------------------------
 class ResetPasswordView(APIView):
     permission_classes = [IsAuthenticated]
@@ -131,21 +131,7 @@ class ResetPasswordView(APIView):
 
 
 # -----------------------------
-# ✅ Logout View
-# -----------------------------
-class LogoutAPIView(generics.GenericAPIView):
-    serializer_class = LogoutSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# -----------------------------
-# ✅ Sales User Profile View (Retrieve, Update, Delete)
+# ✅ Profile View (Retrieve, Update, Delete)
 # -----------------------------
 class SalesUserProfileRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProfileSerializer
