@@ -1,17 +1,22 @@
 from django.urls import path
-from .views import send_reset_email, reset_password_by_email, signup_view, login_view, category_list_create, \
-    ResetPasswordView, SalesUserProfileRetrieveUpdateDestroyView, LogoutAPIView
-from django.contrib.auth import views as auth_views
+from .views import (
+    SignupView,
+    LoginView,
+    LogoutAPIView,
+    CategoryListCreateView,
+    SendResetEmailView,
+    ResetPasswordByEmailView,
+    ResetPasswordView,
+    SalesUserProfileRetrieveUpdateDestroyView
+)
+
 urlpatterns = [
-    path('auth-signup/', signup_view, name='signup'),
-    path('auth-login/', login_view, name='login'),
+    path('auth-signup/', SignupView.as_view(), name='signup'),
+    path('auth-login/', LoginView.as_view(), name='login'),
     path('auth-logout/', LogoutAPIView.as_view(), name='logout'),
-    path('auth-category/', category_list_create, name='category-list-create'),
-    path('auth-send-reset-email/', send_reset_email),
-    path('reset-password-by-email/', reset_password_by_email),
+    path('auth-category/', CategoryListCreateView.as_view(), name='category-list-create'),
+    path('auth-send-reset-email/', SendResetEmailView.as_view(), name='send-reset-email'),
+    path('reset-password-by-email/', ResetPasswordByEmailView.as_view(), name='reset-password-by-email'),
     path('reset_password/', ResetPasswordView.as_view(), name='reset-password'),
-
-
-    # This will handle GET by ID, PUT/PATCH (update), and DELETE
-    path('profile/', SalesUserProfileRetrieveUpdateDestroyView.as_view(), name='business-detail')
+    path('profile/', SalesUserProfileRetrieveUpdateDestroyView.as_view(), name='business-detail'),
 ]
