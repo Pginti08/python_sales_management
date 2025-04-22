@@ -32,6 +32,7 @@ ALLOWED_HOSTS = [ "api.vyzioninnovations.com",
 
 # Application definition
 
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

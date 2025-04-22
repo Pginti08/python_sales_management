@@ -4,12 +4,8 @@ from django.contrib.auth.admin import UserAdmin
 
 class SalesUserAdmin(UserAdmin):
     model = SalesUser
-
-
-
-
     list_display = ['email', 'name', 'phone', 'is_staff', 'role']
-    ordering = ['email']
+    ordering = ['name']
     fieldsets = UserAdmin.fieldsets + (
         (None, {'fields': ('name', 'phone')}),
     )
@@ -21,8 +17,6 @@ class SalesUserAdmin(UserAdmin):
     )
     search_fields = ('email', 'name')
 
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name']  # Show both ID and name
 
 admin.site.register(SalesUser, SalesUserAdmin)
-admin.site.register(Category, CategoryAdmin)
+
