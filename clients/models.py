@@ -8,7 +8,7 @@ class Client(models.Model):
     city_town =  models.CharField(max_length=150)
     pan = models.TextField()
     phone = models.CharField(max_length=15)
-    country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=False, blank=False)
+    country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True)
     client_type = models.CharField(max_length=150)
     gstin = models.CharField(max_length=15)
     email = models.EmailField(unique=True)
