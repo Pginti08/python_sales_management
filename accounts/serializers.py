@@ -63,11 +63,15 @@ class LoginSerializer(serializers.Serializer):
         return data
 
 class ProfileSerializer(serializers.ModelSerializer):
-    country = CountrySerializer()
+    country = CountrySerializer(read_only=True)
+    country_id = serializers.PrimaryKeyRelatedField(
+        queryset=Country.objects.all(),
+        source='country',
+        write_only=True,
+        required=False
+    )
 
     class Meta:
         model = SalesUser
-        fields = ['id', 'name', 'email', 'phone', 'country', 'address']
+        fields = ['id', 'name', 'email', 'phone', 'country', 'country_id', 'address']
         read_only_fields = ['id', 'email', 'role']
-
-

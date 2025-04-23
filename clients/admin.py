@@ -3,7 +3,7 @@ from .models import Client
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ['email', 'business_name', 'phone', 'client_type', 'country']
+    list_display = ['id','email', 'business_name', 'phone', 'client_type', 'country']
     ordering = ['email']
     search_fields = ['email', 'business_name', 'phone']
     list_filter = ['country', 'client_type']
