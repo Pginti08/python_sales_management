@@ -43,18 +43,24 @@ def login_view(request):
             'id': user.id,
             'email': user.email,
             'name': user.name
-        })
+        }, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
 # -----------------------------
 # ✅ Logout View (Clears client-side tokens only)
 # -----------------------------
-@api_view(['POST'])
-def logout_view(request):
-    # Simply tell the frontend to delete tokens
-    return Response({'message': 'Logout successful. Please clear tokens client-side.'}, status=status.HTTP_200_OK)
+class LogoutView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
 
+    def post(self, request):
+        try:
+            refresh_token = request.data.get("refresh_token")
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"detail": "Token successfully blacklisted."}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 # -----------------------------
 # ✅ Category List & Create
