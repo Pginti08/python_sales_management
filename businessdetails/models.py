@@ -10,12 +10,19 @@ class TeamSize(models.Model):
 
 class BusinessDetail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    email = models.EmailField(unique=True, null=True, blank=True)
     business_name = models.CharField(max_length=150)
     team_size = models.ForeignKey(TeamSize, on_delete=models.SET_NULL, null=True, blank=True)
     website = models.TextField()
     phone = models.CharField(max_length=25)
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True)
+    state = models.CharField(max_length=150, null=True, blank=True)
+    city = models.CharField(max_length=150, null=True, blank=True)
+    street_address = models.TextField(null=True, blank=True)
+    postal_code = models.CharField(max_length=15, null=True, blank=True)
     gstin = models.CharField(max_length=25)
+    tax = models.CharField(max_length=15, null=True, blank=True)
+    logo = models.ImageField(upload_to='business/logos/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.business_name} ({self.user.name})"
