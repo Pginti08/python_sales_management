@@ -1,38 +1,32 @@
-import json
-
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import Invoice
-from .serializers import InvoiceSerializer
+from .models import Invoice, InvoiceItem
+from .serializers import InvoiceSerializer, InvoiceListSerializer
+import json
 
+# ✅ Create - already done (keeping for context)
 class InvoiceCreateView(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
         data = request.data.copy()
-
-        # Extract the raw string (we now expect 'items' key from frontend)
         raw_items_str = data.get("items")
         items = []
 
         if raw_items_str:
             try:
-                # valid_json_str = f"[{raw_items_str}]"
                 items = json.loads(raw_items_str)
             except json.JSONDecodeError as e:
-                return Response(
-                    {"error": f"Invalid JSON in items: {str(e)}"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({"error": f"Invalid JSON in items: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Convert QueryDict to regular dict
         final_data = {
             key: value[0] if isinstance(value, list) else value
             for key, value in request.data.lists()
         }
-        final_data["items"] = items  # override with actual list
+        final_data["items"] = items
 
         serializer = InvoiceSerializer(data=final_data, context={'request': request})
         if serializer.is_valid():
@@ -40,12 +34,71 @@ class InvoiceCreateView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+# ✅ Fetch single
 class InvoiceDetailView(APIView):
     permission_classes = [IsAuthenticated]
-    def get(self, request, invoice_number):
+
+    def get(self, request, invoice_id):
         try:
-             invoice = Invoice.objects.get(invoice_number=invoice_number, user=request.user)
-             serializer = InvoiceSerializer(invoice)
-             return Response(serializer.data)
+            invoice = Invoice.objects.get(id=invoice_id, user=request.user)
+            serializer = InvoiceSerializer(invoice)
+            return Response(serializer.data)
         except Invoice.DoesNotExist:
-                return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+# ✅ Update
+class InvoiceUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, invoice_id):
+        try:
+            invoice = Invoice.objects.get(id=invoice_id, user=request.user)
+        except Invoice.DoesNotExist:
+            return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        data = request.data.copy()
+        raw_items_str = data.get("items")
+        items = []
+
+        if raw_items_str:
+            try:
+                items = json.loads(raw_items_str)
+            except json.JSONDecodeError as e:
+                return Response({"error": f"Invalid JSON in items: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        final_data = {
+            key: value[0] if isinstance(value, list) else value
+            for key, value in request.data.lists()
+        }
+        final_data["items"] = items
+
+        serializer = InvoiceSerializer(invoice, data=final_data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ✅ Delete by ID
+class InvoiceDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, invoice_id):
+        try:
+            invoice = Invoice.objects.get(id=invoice_id, user=request.user)
+            invoice.delete()
+            return Response({"success": "Invoice deleted"}, status=status.HTTP_204_NO_CONTENT)
+        except Invoice.DoesNotExist:
+            return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
+
+# ✅ List all
+class InvoiceListView(APIView):
+    
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        invoices = Invoice.objects.filter(user=request.user)
+        serializer = InvoiceListSerializer(invoices, many=True)
+        return Response(serializer.data)
