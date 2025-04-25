@@ -30,4 +30,16 @@ python manage.py migrate
 python manage.py createsuperuser
 
 ## Run the Development Server
-python manage.py runserver
+
+sudo -i -u postgres psql
+sudo service postgresql restart
+
+python manage.py migrate
+
+source venv/bin/activate
+
+// to open database 
+sudo -u postgres psql test_development;
+
+// to keep server running in background.
+nohup python manage.py runserver 0.0.0.0:8000 &
