@@ -15,6 +15,7 @@ class Client(models.Model):
     gstin = models.CharField(max_length=15)
     email = models.EmailField(unique=True)
     postal_code = models.CharField(max_length=15,)
+    client_region = models.CharField(max_length=15, default = 'Unknown')
 
     def __str__(self):
         return self.business_name
