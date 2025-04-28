@@ -8,12 +8,13 @@ class Client(models.Model):
     pan = models.TextField()
     phone = models.CharField(max_length=15)
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, blank=True)
-    state = models.CharField(max_length=150, null=True, blank=True)
-    city = models.CharField(max_length=150, null=True, blank=True)
-    street_address = models.TextField(null=True, blank=True)
+    state = models.CharField(max_length=150)
+    city = models.CharField(max_length=150)
+    street_address = models.TextField()
     client_type = models.CharField(max_length=150)
     gstin = models.CharField(max_length=15)
     email = models.EmailField(unique=True)
+    postal_code = models.CharField(max_length=15,)
 
     def __str__(self):
         return self.business_name
