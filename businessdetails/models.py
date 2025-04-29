@@ -4,6 +4,8 @@ from common_country_module.models import Country
 
 class TeamSize(models.Model):
     size = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.size
@@ -23,6 +25,7 @@ class BusinessDetail(models.Model):
     gstin = models.CharField(max_length=25)
     tax = models.CharField(max_length=15, null=True, blank=True)
     logo = models.ImageField(upload_to='business/logos/', null=True, blank=True)  # Optional field
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"{self.business_name} ({self.user.name})"

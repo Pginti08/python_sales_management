@@ -99,6 +99,6 @@ class InvoiceListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        invoices = Invoice.objects.filter(user=request.user)
+        invoices = Invoice.objects.filter(user=request.user).order_by('-created_at')
         serializer = InvoiceListSerializer(invoices, many=True)
         return Response(serializer.data)
