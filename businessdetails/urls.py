@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     BusinessDetailListCreateView,
-    BusinessDetailRetrieveUpdateDestroyView, team_size_create
+    BusinessDetailRetrieveUpdateDestroyView, team_size_create,
+
 )
 
 urlpatterns = [
@@ -11,4 +12,5 @@ urlpatterns = [
 
     # This will handle GET by ID, PUT/PATCH (update), and DELETE
     path('business/<int:pk>/', BusinessDetailRetrieveUpdateDestroyView.as_view(), name='business-detail'),
+
 ]

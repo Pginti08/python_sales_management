@@ -8,7 +8,8 @@ class BankDetail(models.Model):
     account_number = models.CharField(max_length=50)
     ifsc_code = models.CharField(max_length=20)
     swift_code = models.CharField(max_length=20)
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"{self.account_name} - {self.bank_name}"
 
