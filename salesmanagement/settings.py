@@ -20,11 +20,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DJANGO_ENV = os.environ.get("DJANGO_ENV", "local")
 
 # Load the appropriate .env file
-env_file = ".env" if DJANGO_ENV == "local" else ".env_development"
-env_path = os.path.join(BASE_DIR, env_file)
-
 env = environ.Env()
-environ.Env.read_env(env_path)
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -33,9 +30,9 @@ environ.Env.read_env(env_path)
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = env.bool("DEBUG", default=False)
 
-
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = env("ALLOWED_HOSTS", "").split(",")
 
 
 # Application definition
@@ -109,8 +106,6 @@ WSGI_APPLICATION = 'salesmanagement.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DEBUG = env('DEBUG', default=True, cast=bool)
 
 
 DATABASES = {
