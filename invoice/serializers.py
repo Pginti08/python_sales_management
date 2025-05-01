@@ -44,6 +44,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'client_id',
             'business',
             'business_id',
+            'status',
             'items',
             'invoice_logo',
         ]

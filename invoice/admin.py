@@ -4,7 +4,7 @@ from .models import BusinessDetail, Invoice, InvoiceItem
 
 @admin.register(Invoice)
 class InvoiceDetailAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user_id', 'bank', 'client', 'business', 'country', 'invoice_number', 'invoice_date')
+    list_display = ('id', 'user_id', 'bank', 'client', 'business', 'country', 'invoice_number', 'invoice_date', 'status')
     search_fields = ('business_category', 'code')
 
 @admin.register(InvoiceItem)
