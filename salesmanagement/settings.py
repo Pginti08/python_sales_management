@@ -34,7 +34,6 @@ ALLOWED_HOSTS = [ "api.vyzioninnovations.com",
     "127.0.0.1",
     "localhost",]
 
-
 # Application definition
 
 
