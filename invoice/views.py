@@ -99,6 +99,10 @@ class InvoiceListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        invoices = Invoice.objects.filter(user=request.user).order_by('-created_at')
-        serializer = InvoiceListSerializer(invoices, many=True)
-        return Response(serializer.data)
+        try:
+            invoices = Invoice.objects.filter(user=request.user).order_by('-created_at')
+            serializer = InvoiceListSerializer(invoices, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
