@@ -42,7 +42,7 @@ class InvoiceDetailView(APIView):
     def get(self, request, invoice_id):
         try:
             invoice = Invoice.objects.get(id=invoice_id, user=request.user)
-            serializer = InvoiceSerializer(invoice)
+            serializer = InvoiceListSerializer(invoice)
             return Response(serializer.data)
         except Invoice.DoesNotExist:
             return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)

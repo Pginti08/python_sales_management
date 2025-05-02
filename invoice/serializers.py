@@ -20,16 +20,6 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
-    country = CountrySerializer(read_only=True)
-    client = ClientSerializer(read_only=True)
-    business = BusinessDetailSerializer(read_only=True)
-    bank = BankDetailSerializer(read_only=True)
-
-    country_id = serializers.IntegerField(write_only=True, required=True)
-    client_id = serializers.IntegerField(write_only=True, required=True)
-    business_id = serializers.IntegerField(write_only=True, required=True)
-    bank_id = serializers.IntegerField(write_only=True, required=True)
-
     items = InvoiceItemSerializer(many=True, required=True)
 
     class Meta:
@@ -41,13 +31,9 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'invoice_date',
             'due_date',
             'bank',
-            'bank_id'
             'country',
-            'country_id',
             'client',
-            'client_id',
             'business',
-            'business_id',
             'status',
             'items',
             'invoice_logo',
@@ -63,43 +49,37 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
-        country_id = validated_data.pop('country_id')
-        client_id = validated_data.pop('client_id')
-        business_id = validated_data.pop('business_id')
 
-        invoice = Invoice.objects.create(
-            **validated_data,
-            country_id=country_id,
-            client_id=client_id,
-            business_id=business_id
-        )
+        # validate nested items explicitly
+        items_serializer = InvoiceItemSerializer(data=items_data, many=True)
+        items_serializer.is_valid(raise_exception=True)  # ✅ Will raise validation error if any
 
-        for item in items_data:
-            InvoiceItem.objects.create(invoice=invoice, **item)
+        invoice = Invoice.objects.create(**validated_data)
+
+        # save nested items
+        for item_data in items_serializer.validated_data:
+            InvoiceItem.objects.create(invoice=invoice, **item_data)
+
         return invoice
 
     def update(self, instance, validated_data):
         items_data = validated_data.pop('items')
 
-        country_id = validated_data.pop('country_id', None)
-        client_id = validated_data.pop('client_id', None)
-        business_id = validated_data.pop('business_id', None)
+        # validate nested items explicitly
+        items_serializer = InvoiceItemSerializer(data=items_data, many=True)
+        items_serializer.is_valid(raise_exception=True)  # ✅ Will raise validation error if any
 
+        # update invoice fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-
-        if country_id is not None:
-            instance.country_id = country_id
-        if client_id is not None:
-            instance.client_id = client_id
-        if business_id is not None:
-            instance.business_id = business_id
-
         instance.save()
 
+        # clear old items
         instance.items.all().delete()
-        for item in items_data:
-            InvoiceItem.objects.create(invoice=instance, **item)
+
+        # save new items
+        for item_data in items_serializer.validated_data:
+            InvoiceItem.objects.create(invoice=instance, **item_data)
 
         return instance
 
@@ -107,7 +87,7 @@ class InvoiceListSerializer(serializers.ModelSerializer):
     country = CountrySerializer(read_only=True)
     client = ClientSerializer(read_only=True)
     business = BusinessDetailSerializer(read_only=True)
-
+    bank = BankDetailSerializer(read_only=True)
     class Meta:
         model = Invoice
         fields = [
