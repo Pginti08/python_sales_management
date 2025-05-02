@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from bankdetails.serializers import BankDetailSerializer
 from businessdetails.models import BusinessDetail
 from businessdetails.serializers import BusinessDetailSerializer
 
@@ -22,10 +23,12 @@ class InvoiceSerializer(serializers.ModelSerializer):
     country = CountrySerializer(read_only=True)
     client = ClientSerializer(read_only=True)
     business = BusinessDetailSerializer(read_only=True)
+    bank = BankDetailSerializer(read_only=True)
 
     country_id = serializers.IntegerField(write_only=True, required=True)
     client_id = serializers.IntegerField(write_only=True, required=True)
     business_id = serializers.IntegerField(write_only=True, required=True)
+    bank_id = serializers.IntegerField(write_only=True, required=True)
 
     items = InvoiceItemSerializer(many=True, required=True)
 
@@ -38,6 +41,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'invoice_date',
             'due_date',
             'bank',
+            'bank_id'
             'country',
             'country_id',
             'client',
