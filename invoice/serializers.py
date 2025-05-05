@@ -100,4 +100,5 @@ class InvoiceListSerializer(serializers.ModelSerializer):
             'client',
             'business',
             'invoice_logo',
+            'status'
         ]

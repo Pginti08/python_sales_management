@@ -2,10 +2,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
 from .models import Invoice, InvoiceItem
 from .serializers import InvoiceSerializer, InvoiceListSerializer
 import json
+
 
 # ✅ Create - already done (keeping for context)
 class InvoiceCreateView(APIView):
@@ -93,11 +93,10 @@ class InvoiceDeleteView(APIView):
         except Invoice.DoesNotExist:
             return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
 
+
 # ✅ List all
 class InvoiceListView(APIView):
-    
     permission_classes = [IsAuthenticated]
-
     def get(self, request):
         try:
             invoices = Invoice.objects.filter(user=request.user).order_by('-created_at')
@@ -105,4 +104,3 @@ class InvoiceListView(APIView):
             return Response(serializer.data)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
-
