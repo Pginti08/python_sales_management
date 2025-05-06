@@ -22,7 +22,7 @@ class BusinessDetail(models.Model):
     city = models.CharField(max_length=150)
     street_address = models.TextField()
     postal_code = models.CharField(max_length=15, default='unknown')
-    gstin = models.CharField(max_length=25)
+    gstin = models.CharField(max_length=25, null=True, blank=True)
     tax = models.CharField(max_length=15, null=True, blank=True)
     logo = models.ImageField(upload_to='business/logos/', null=True, blank=True)  # Optional field
     created_at = models.DateTimeField(auto_now_add=True)

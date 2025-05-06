@@ -88,6 +88,7 @@ class InvoiceListSerializer(serializers.ModelSerializer):
     client = ClientSerializer(read_only=True)
     business = BusinessDetailSerializer(read_only=True)
     bank = BankDetailSerializer(read_only=True)
+    items = InvoiceItemSerializer(read_only=True)
     class Meta:
         model = Invoice
         fields = [
@@ -100,5 +101,6 @@ class InvoiceListSerializer(serializers.ModelSerializer):
             'client',
             'business',
             'invoice_logo',
-            'status'
+            'status',
+            'items'
         ]
