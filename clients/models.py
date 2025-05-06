@@ -12,7 +12,7 @@ class Client(models.Model):
     city = models.CharField(max_length=150)
     street_address = models.TextField()
     client_type = models.CharField(max_length=150)
-    gstin = models.CharField(max_length=15)
+    gstin = models.CharField(max_length=15, null=True, blank=True)
     email = models.EmailField(unique=True)
     postal_code = models.CharField(max_length=15,)
     client_region = models.CharField(max_length=15, default = 'Unknown')
