@@ -11,5 +11,6 @@ urlpatterns = [
     path('api/', include('invoice.urls')),
     path('api/', include('projects.urls')),
     path('api/', include('count.urls')),
+    path('admin-api/', include('adminpanel.urls')),
 
 ]
