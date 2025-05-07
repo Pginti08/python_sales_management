@@ -9,14 +9,14 @@ from common_country_module.models import Country
 
 class Invoice(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    bank = models.ForeignKey(BankDetail, on_delete=models.CASCADE)
+    bank = models.ForeignKey(BankDetail, on_delete=models.CASCADE, null=True, blank=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     business = models.ForeignKey(BusinessDetail, on_delete=models.CASCADE)
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     invoice_number = models.CharField(max_length=100, unique=True)
     invoice_date = models.DateField()
     due_date = models.DateField()
-    status = models.CharField(max_length=100, default='pending')
+    status = models.CharField(max_length=100, default='draft')
     invoice_logo = models.ImageField(upload_to='invoices/logos/', default='unknown')
     created_at = models.DateTimeField(auto_now=True)  # auto_now_add is fine here
     updated_at = models.DateTimeField(auto_now=True)
