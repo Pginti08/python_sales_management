@@ -1,17 +1,12 @@
-from django.urls import path
-from .views import (
-    AdminBankDetailListView,
-    AdminBusinessDetailListView,
-    AdminInvoiceListView,
-    AdminClientListView,
-    AdminProjectListView
-)
+from rest_framework.routers import DefaultRouter
+from . import views  # import your views file
 
-urlpatterns = [
-    path('banks/', AdminBankDetailListView.as_view(), name='admin-banks'),
-    path('businesses/', AdminBusinessDetailListView.as_view(), name='admin-businesses'),
-    path('invoices/', AdminInvoiceListView.as_view(), name='admin-invoices'),
-    path('clients/', AdminClientListView.as_view(), name='admin-clients'),
-    path('projects/', AdminProjectListView.as_view(), name='admin-projects'),
+router = DefaultRouter()
+router.register(r'admin/bankdetails', views.AdminBankDetailViewSet, basename='admin-bankdetails')
+router.register(r'admin/businessdetails', views.AdminBusinessDetailViewSet, basename='admin-businessdetails')
+router.register(r'admin/invoices', views.AdminInvoiceViewSet, basename='admin-invoices')
+router.register(r'admin/clients', views.AdminClientViewSet, basename='admin-clients')
+router.register(r'admin/projects', views.AdminProjectViewSet, basename='admin-projects')
+router.register(r'admin/users', views.AdminUserProfileViewSet, basename='admin-users')
 
-]
+urlpatterns = router.urls

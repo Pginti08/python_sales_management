@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from bankdetails.models import BankDetail
 from bankdetails.serializers import BankDetailSerializer
 from businessdetails.models import BusinessDetail
 from businessdetails.serializers import BusinessDetailSerializer
@@ -20,8 +21,12 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
+    bank = serializers.PrimaryKeyRelatedField(
+        queryset=BankDetail.objects.all(),
+        required=False,
+        allow_null=True
+    )
     items = InvoiceItemSerializer(many=True, required=True)
-
     class Meta:
         model = Invoice
         fields = [

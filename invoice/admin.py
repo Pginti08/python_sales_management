@@ -9,5 +9,5 @@ class InvoiceDetailAdmin(admin.ModelAdmin):
 
 @admin.register(InvoiceItem)
 class InvoiceItemAdmin(admin.ModelAdmin):
-    list_display = ('invoice', 'name', 'quantity', 'price', 'gst', 'igst')
+    list_display = ('id','invoice_id', 'invoice', 'name', 'quantity', 'price', 'gst', 'igst')
     search_fields = ('name', 'quantity', 'price')

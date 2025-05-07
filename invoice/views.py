@@ -1,3 +1,5 @@
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -5,6 +7,7 @@ from rest_framework import status
 from .models import Invoice, InvoiceItem
 from .serializers import InvoiceSerializer, InvoiceListSerializer
 import json
+from rest_framework import  filters
 
 
 # ✅ Create - already done (keeping for context)
@@ -95,12 +98,13 @@ class InvoiceDeleteView(APIView):
 
 
 # ✅ List all
-class InvoiceListView(APIView):
+
+class InvoiceListView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    def get(self, request):
-        try:
-            invoices = Invoice.objects.filter(user=request.user).order_by('-created_at')
-            serializer = InvoiceListSerializer(invoices, many=True)
-            return Response(serializer.data)
-        except Exception as e:
-            return Response({"error": str(e)}, status=500)
+    serializer_class = InvoiceListSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['due_date']
+    search_fields = ['invoice_number']
+
+    def get_queryset(self):
+        return Invoice.objects.filter(user=self.request.user).order_by('-created_at')
