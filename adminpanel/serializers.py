@@ -11,6 +11,7 @@ from rest_framework import serializers
 from accounts.models import SalesUser
 
 class BankDetailSerializer(serializers.ModelSerializer):
+    user = ProfileSerializer(read_only=True)
     class Meta:
         model = BankDetail
         fields = '__all__'
@@ -22,16 +23,19 @@ class countrySerializer(serializers.ModelSerializer):
 
 
 class BusinessDetailSerializer(serializers.ModelSerializer):
+    user = ProfileSerializer(read_only=True)
     class Meta:
         model = BusinessDetail
         fields = '__all__'
 
 class InvoiceSerializer(serializers.ModelSerializer):
+    user = ProfileSerializer(read_only=True)
     class Meta:
         model = Invoice
         fields = '__all__'
 
 class InvoiceItemSerializer(serializers.ModelSerializer):
+    user = ProfileSerializer(read_only=True)
     class Meta:
         model = InvoiceItem
         fields = '__all__'
@@ -44,6 +48,7 @@ class ClientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProjectSerializer(serializers.ModelSerializer):
+    user = ProfileSerializer(read_only=True)
     class Meta:
         model = Project
         fields = '__all__'

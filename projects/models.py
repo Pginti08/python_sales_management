@@ -17,6 +17,12 @@ class Project(models.Model):
     project_technology = models.CharField(max_length=255)
     repo_link = models.URLField()
     developer_name = models.CharField(max_length=255)
+    website = models.URLField(blank=True, null=True)
+    iosApp = models.URLField(blank=True, null=True)
+    android = models.URLField(blank=True, null=True)
+    adminPanel = models.URLField(blank=True, null=True)
+    document1 = models.URLField(blank=True, null=True)
+    document2 = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
