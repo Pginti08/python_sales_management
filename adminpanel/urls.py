@@ -1,12 +1,28 @@
 from rest_framework.routers import DefaultRouter
-from . import views  # import your views file
+from adminpanel.views import (
+    AdminUserViewSet,
+    AdminClientViewSet,
+    AdminInvoiceViewSet,
+    AdminProjectViewSet,
+    AdminBusinessDetailViewSet,
+    AdminBankDetailViewSet,
+    AdminInvoiceItemViewSet,
+    # AdminClientUserViewSet,       # ✅ new
+    # AdminBusinessUserViewSet,     # ✅ new
+)
 
 router = DefaultRouter()
-router.register(r'admin/bankdetails', views.AdminBankDetailViewSet, basename='admin-bankdetails')
-router.register(r'admin/businessdetails', views.AdminBusinessDetailViewSet, basename='admin-businessdetails')
-router.register(r'admin/invoices', views.AdminInvoiceViewSet, basename='admin-invoices')
-router.register(r'admin/clients', views.AdminClientViewSet, basename='admin-clients')
-router.register(r'admin/projects', views.AdminProjectViewSet, basename='admin-projects')
-router.register(r'admin/users', views.AdminUserProfileViewSet, basename='admin-users')
+
+router.register(r'admin/users', AdminUserViewSet)
+router.register(r'admin/clients', AdminClientViewSet)
+router.register(r'admin/invoices', AdminInvoiceViewSet)
+router.register(r'admin/projects', AdminProjectViewSet)
+router.register(r'admin/businesses', AdminBusinessDetailViewSet)
+router.register(r'admin/banks', AdminBankDetailViewSet)
+router.register(r'admin/items', AdminInvoiceItemViewSet)
+
+# ✅ new routes for user-based filtering
+# router.register(r'admin/clients-by-user', AdminClientUserViewSet)
+# router.register(r'admin/businesses-by-user', AdminBusinessUserViewSet)
 
 urlpatterns = router.urls
