@@ -1,6 +1,7 @@
 from django.db import models
 
 from clients.models import Client
+from common_country_module.models import Country
 from salesmanagement import settings
 
 
@@ -16,6 +17,7 @@ class Project(models.Model):
     client_selection = models.ForeignKey(Client, on_delete=models.CASCADE)
     project_technology = models.CharField(max_length=255)
     repo_link = models.URLField()
+    country = models.ForeignKey(Country, on_delete=models.CASCADE)
     developer_name = models.CharField(max_length=255)
     website = models.URLField(blank=True, null=True)
     iosApp = models.URLField(blank=True, null=True)
