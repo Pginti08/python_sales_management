@@ -3,6 +3,46 @@ from .models import Project
 import time
 
 class ProjectSerializer(serializers.ModelSerializer):
+    repo_link = serializers.ListField(
+        child=serializers.URLField(),
+        required=True
+    )
+    developer_name = serializers.ListField(
+        child=serializers.CharField(),
+        required=True
+    )
+
+    # Optional fields (no validation on items)
+    website = serializers.ListField(
+        child=serializers.URLField(),
+        required=False,
+        allow_null=True
+    )
+    iosApp = serializers.ListField(
+        child=serializers.URLField(),
+        required=False,
+        allow_null=True
+    )
+    android = serializers.ListField(
+        child=serializers.URLField(),
+        required=False,
+        allow_null=True
+    )
+    adminPanel = serializers.ListField(
+        child=serializers.URLField(),
+        required=False,
+        allow_null=True
+    )
+    document1 = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        allow_null=True
+    )
+    document2 = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        allow_null=True
+    )
     class Meta:
         model = Project
         fields = '__all__'

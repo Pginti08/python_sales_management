@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-
 from clients.models import Client
 from common_country_module.models import Country
 
@@ -17,15 +16,16 @@ class Project(models.Model):
     client_selection = models.ForeignKey(Client, on_delete=models.CASCADE)
     project_technology = models.CharField(max_length=255)
 
-    # Changed to JSONFields for storing lists
-    repo_link = models.JSONField(blank=True, null=True)
-    website = models.JSONField(blank=True, null=True)
-    iosApp = models.JSONField(blank=True, null=True)
-    android = models.JSONField(blank=True, null=True)
-    adminPanel = models.JSONField(blank=True, null=True)
-    document1 = models.JSONField(blank=True, null=True)
-    document2 = models.JSONField(blank=True, null=True)
-    developer_name = models.JSONField(blank=True, null=True)
+    # JSONFields with default as list
+    developer_name = models.JSONField(default=list,)
+    repo_link = models.JSONField(default=list,)
+    website = models.JSONField(default=list, blank=True)
+    iosApp = models.JSONField(default=list, blank=True)
+    android = models.JSONField(default=list, blank=True)
+    adminPanel = models.JSONField(default=list, blank=True)
+    document1 = models.JSONField(default=list, blank=True)
+    document2 = models.JSONField(default=list, blank=True)
+
 
     country_id = models.ForeignKey(Country, on_delete=models.CASCADE)
 
