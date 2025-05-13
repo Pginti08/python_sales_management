@@ -1,8 +1,8 @@
 from django.db import models
+from django.conf import settings
 
 from clients.models import Client
 from common_country_module.models import Country
-from salesmanagement import settings
 
 
 class Project(models.Model):
@@ -16,17 +16,18 @@ class Project(models.Model):
     status = models.CharField(max_length=50)
     client_selection = models.ForeignKey(Client, on_delete=models.CASCADE)
     project_technology = models.CharField(max_length=255)
-    repo_link = models.URLField()
+
+    # Changed to JSONFields for storing lists
+    repo_link = models.JSONField(blank=True, null=True)
+    website = models.JSONField(blank=True, null=True)
+    iosApp = models.JSONField(blank=True, null=True)
+    android = models.JSONField(blank=True, null=True)
+    adminPanel = models.JSONField(blank=True, null=True)
+    document1 = models.JSONField(blank=True, null=True)
+    document2 = models.JSONField(blank=True, null=True)
+    developer_name = models.JSONField(blank=True, null=True)
+
     country_id = models.ForeignKey(Country, on_delete=models.CASCADE)
-    developer_name = models.CharField(max_length=255)
-    website = models.URLField(blank=True, null=True)
-    iosApp = models.CharField(blank=True, null=True)
-    android = models.CharField(blank=True, null=True)
-    adminPanel = models.CharField(blank=True, null=True)
-    document1 = models.CharField(blank=True, null=True)
-    document2 = models.CharField(blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.project_name
