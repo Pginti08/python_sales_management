@@ -15,11 +15,19 @@ class Project(models.Model):
     status = models.CharField(max_length=50)
     client_selection = models.ForeignKey(Client, on_delete=models.CASCADE)
     project_technology = models.CharField(max_length=255)
-    developer_name = models.JSONField(default=list)
-    # ✅ Grouped as dictionaries now
-    repo_link = models.JSONField(default=dict, blank=True)
-    documents = models.JSONField(default=dict, blank=True)
-    live_links = models.JSONField(default=dict, blank=True)
+
+    # JSONFields with default as list
+    developer_name = models.JSONField(default=list,)
+    repo_link = models.JSONField(default=list,)
+    website = models.JSONField(default=list, blank=True)
+    iosApp = models.JSONField(default=list, blank=True)
+    android = models.JSONField(default=list, blank=True)
+    adminPanel = models.JSONField(default=list, blank=True)
+    document1 = models.JSONField(default=list, blank=True)
+    document2 = models.JSONField(default=list, blank=True)
+
+
     country_id = models.ForeignKey(Country, on_delete=models.CASCADE)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
