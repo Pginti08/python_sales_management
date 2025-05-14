@@ -9,7 +9,7 @@ urlpatterns = [
     path('api/', include('common_country_module.urls')),
     path('api/', include('bankdetails.urls')),
     path('api/', include('invoice.urls')),
-    # path('api/', include('projects.urls')),
+    path('api/', include('projects.urls')),
     path('api/', include('count.urls')),
     path('api/', include('adminpanel.urls')),
 
