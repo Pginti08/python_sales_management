@@ -86,7 +86,6 @@ class ProjectSerializer(serializers.ModelSerializer):
             instance.developer_name = validated_data.pop('developer_name')
         if 'project_technology' in validated_data:
             instance.project_technology = validated_data.pop('project_technology')
-
         # Timestamps
         start_date = validated_data.get('start_date', instance.start_date)
         end_date = validated_data.get('end_date', instance.end_date)
