@@ -10,7 +10,7 @@ class ProjectListCreateView(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
 
     # Allow filtering by status or technology
-    filterset_fields = ['status', 'project_technology']
+    filterset_fields = ['status', 'project_name']
     search_fields = ['project_name']
 
     def get_queryset(self):
