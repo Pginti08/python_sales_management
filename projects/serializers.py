@@ -25,11 +25,10 @@ class DocumentGroupSerializer(serializers.Serializer):
     link2 = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
 
-# Project main serializer
 class ProjectSerializer(serializers.ModelSerializer):
     developer_name = DeveloperSerializer(many=True, required=True)
     live_links = LinkGroupSerializer(required=False)
-    repo_link = LinkGroupSerializer(required=False)
+    repo_links = LinkGroupSerializer(required=False)
     documents = DocumentGroupSerializer(required=False)
 
     class Meta:
@@ -42,32 +41,22 @@ class ProjectSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Developer list cannot be empty.")
         return value
 
-    def to_representation(self, instance):
-        """Customize the response format"""
-        representation = super().to_representation(instance)
-
-        # Convert date fields to strings
-        representation['start_date'] = instance.start_date.strftime('%Y-%m-%d')
-        representation['end_date'] = instance.end_date.strftime('%Y-%m-%d')
-
-        # Ensure the developer_name field is a list of dicts with id and name
-        representation['developer_name'] = [{'id': dev['id'], 'name': dev['name']} for dev in instance.developer_name]
-
-        return representation
+    def validate_project_technology(self, value):
+        if not isinstance(value, list) or not all(isinstance(tech, str) for tech in value):
+            raise serializers.ValidationError("project_technology must be a list of strings.")
+        return value
 
     def create(self, validated_data):
         developer_data = validated_data.pop('developer_name')
         live_links = validated_data.pop('live_links', {})
-        repo_link = validated_data.pop('repo_link', {})
+        repo_links = validated_data.pop('repo_links', {})  # ✅ FIXED
         documents = validated_data.pop('documents', {})
 
-        # Convert nested serializer data to raw dicts
         validated_data['developer_name'] = developer_data
         validated_data['live_links'] = live_links
-        validated_data['repo_link'] = repo_link
+        validated_data['repo_links'] = repo_links  # ✅ FIXED
         validated_data['documents'] = documents
 
-        # Add timestamps
         start_date = validated_data.get('start_date')
         end_date = validated_data.get('end_date')
 
@@ -82,15 +71,15 @@ class ProjectSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         developer_data = validated_data.pop('developer_name', None)
         live_links = validated_data.pop('live_links', None)
-        repo_link = validated_data.pop('repo_link', None)
+        repo_links = validated_data.pop('repo_links', None)  # ✅ FIXED
         documents = validated_data.pop('documents', None)
 
         if developer_data is not None:
             instance.developer_name = developer_data
         if live_links is not None:
             instance.live_links = live_links
-        if repo_link is not None:
-            instance.repo_link = repo_link
+        if repo_links is not None:
+            instance.repo_links = repo_links  # ✅ FIXED
         if documents is not None:
             instance.documents = documents
 

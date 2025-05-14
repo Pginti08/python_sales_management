@@ -14,10 +14,10 @@ class Project(models.Model):
     end_date_timestamp = models.BigIntegerField(blank=True, null=True)
     status = models.CharField(max_length=50)
     client_selection = models.ForeignKey(Client, on_delete=models.CASCADE)
-    project_technology = models.CharField(max_length=255)
+    project_technology = models.JSONField(default=list)
     developer_name = models.JSONField(default=list)
     # ✅ Grouped as dictionaries now
-    repo_link = models.JSONField(default=dict, blank=True)
+    repo_links = models.JSONField(default=dict, blank=True)
     documents = models.JSONField(default=dict, blank=True)
     live_links = models.JSONField(default=dict, blank=True)
     country_id = models.ForeignKey(Country, on_delete=models.CASCADE)
