@@ -1,15 +1,6 @@
 from rest_framework import serializers
 from .models import Project
-from clients.models import Client
-from common_country_module.models import Country
 import time
-
-
-# Developer info schema
-class DeveloperSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
-
 
 # Optional links
 class LinkGroupSerializer(serializers.Serializer):
@@ -18,15 +9,12 @@ class LinkGroupSerializer(serializers.Serializer):
     android = serializers.URLField(required=False, allow_blank=True, allow_null=True)
     adminPanel = serializers.URLField(required=False, allow_blank=True, allow_null=True)
 
-
 # Optional documents
 class DocumentGroupSerializer(serializers.Serializer):
     link1 = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     link2 = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
-
 class ProjectSerializer(serializers.ModelSerializer):
-    developer_name = DeveloperSerializer(many=True, required=True)
     live_links = LinkGroupSerializer(required=False)
     repo_links = LinkGroupSerializer(required=False)
     documents = DocumentGroupSerializer(required=False)
@@ -37,6 +25,8 @@ class ProjectSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'created_at', 'updated_at']
 
     def validate_developer_name(self, value):
+        if not isinstance(value, list) or not all(isinstance(name, str) for name in value):
+            raise serializers.ValidationError("developer_name must be a list of strings.")
         if not value:
             raise serializers.ValidationError("Developer list cannot be empty.")
         return value
@@ -46,17 +36,33 @@ class ProjectSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("project_technology must be a list of strings.")
         return value
 
+    def to_internal_value(self, data):
+        """
+        Override this method to ensure nested dicts (live_links, repo_links, documents) are converted properly.
+        """
+        live_links = data.get('live_links', {})
+        repo_links = data.get('repo_links', {})
+        documents = data.get('documents', {})
+
+        if isinstance(live_links, dict):
+            data['live_links'] = live_links
+        if isinstance(repo_links, dict):
+            data['repo_links'] = repo_links
+        if isinstance(documents, dict):
+            data['documents'] = documents
+
+        return super().to_internal_value(data)
+
     def create(self, validated_data):
-        developer_data = validated_data.pop('developer_name')
         live_links = validated_data.pop('live_links', {})
-        repo_links = validated_data.pop('repo_links', {})  # ✅ FIXED
+        repo_links = validated_data.pop('repo_links', {})
         documents = validated_data.pop('documents', {})
 
-        validated_data['developer_name'] = developer_data
         validated_data['live_links'] = live_links
-        validated_data['repo_links'] = repo_links  # ✅ FIXED
+        validated_data['repo_links'] = repo_links
         validated_data['documents'] = documents
 
+        # Timestamps
         start_date = validated_data.get('start_date')
         end_date = validated_data.get('end_date')
 
@@ -69,26 +75,26 @@ class ProjectSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        developer_data = validated_data.pop('developer_name', None)
-        live_links = validated_data.pop('live_links', None)
-        repo_links = validated_data.pop('repo_links', None)  # ✅ FIXED
-        documents = validated_data.pop('documents', None)
+        # Optional nested groups
+        for field in ['live_links', 'repo_links', 'documents']:
+            value = validated_data.pop(field, None)
+            if value is not None:
+                setattr(instance, field, value)
 
-        if developer_data is not None:
-            instance.developer_name = developer_data
-        if live_links is not None:
-            instance.live_links = live_links
-        if repo_links is not None:
-            instance.repo_links = repo_links  # ✅ FIXED
-        if documents is not None:
-            instance.documents = documents
+        # Optional list fields
+        if 'developer_name' in validated_data:
+            instance.developer_name = validated_data.pop('developer_name')
+        if 'project_technology' in validated_data:
+            instance.project_technology = validated_data.pop('project_technology')
 
+        # Timestamps
         start_date = validated_data.get('start_date', instance.start_date)
         end_date = validated_data.get('end_date', instance.end_date)
 
         if start_date:
-            validated_data['start_date_timestamp'] = int(time.mktime(start_date.timetuple()))
+            instance.start_date_timestamp = int(time.mktime(start_date.timetuple()))
         if end_date:
-            validated_data['end_date_timestamp'] = int(time.mktime(end_date.timetuple()))
+            instance.end_date_timestamp = int(time.mktime(end_date.timetuple()))
 
+        # Update remaining fields
         return super().update(instance, validated_data)
