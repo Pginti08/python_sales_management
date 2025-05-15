@@ -1,108 +1,70 @@
 from django.core.mail import send_mail
-from rest_framework import filters, status, permissions, viewsets
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
-from rest_framework.response import Response
-
+from rest_framework.exceptions import ValidationError
 from accounts.models import SalesUser
-from accounts.serializers import ProfileSerializer  # ✅ added UserSerializer import from accounts.serializers
-from clients import serializers
-from common_country_module.models import Country
-from .serializers import (
-    BankDetailSerializer,
-    BusinessDetailSerializer,
-    InvoiceSerializer,
-    ClientSerializer,
-    ProjectSerializer,
-    countrySerializer, UserSerializer, InvoiceItemSerializer
-)
+
 from bankdetails.models import BankDetail
 from businessdetails.models import BusinessDetail
 from invoice.models import Invoice, InvoiceItem
 from clients.models import Client
 from projects.models import Project
+from rest_framework.response import Response
+
+from accounts.serializers import ProfileSerializer
+from .serializers import (
+    BankDetailSerializer,
+    BusinessDetailSerializer,
+     ClientSerializer,
+    ProjectSerializer, UserSerializer,
+)
 
 
-# ================== ADMIN BUSINESS DETAIL VIEWSET ==================
-class AdminBusinessDetailViewSet(viewsets.ModelViewSet):
+# ================== BASE ADMIN VIEWSET ==================
+class AdminBaseUserLinkedViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for Admin to view, create, update, and delete Business Details.
-    Only accessible to Admin users.
+    Base ViewSet for models linked to SalesUser (user field).
+    Admin can perform full CRUD and assign user_id during creation.
     """
-    queryset = BusinessDetail.objects.all().order_by('-created_at')
-    serializer_class = BusinessDetailSerializer
-    permission_classes = [permissions.IsAdminUser]
-# ================== END ADMIN BUSINESS DETAIL VIEWSET ==================
-
-
-# ================== ADMIN INVOICE VIEWSET ==================
-class AdminInvoiceViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for Admin to manage (CRUD) Invoices.
-    Only accessible to Admin users.
-    """
-    queryset = Invoice.objects.all().order_by('-created_at')
-    serializer_class = InvoiceSerializer
-    permission_classes = [permissions.IsAdminUser]
-# ================== END ADMIN INVOICE VIEWSET ==================
-
-class AdminInvoiceItemViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for Admin to manage (CRUD) Invoices.
-    Only accessible to Admin users.
-    """
-    queryset = InvoiceItem.objects.all().order_by('-created_at')
-    serializer_class = InvoiceItemSerializer
     permission_classes = [permissions.IsAdminUser]
 
-# ================== ADMIN CLIENT VIEWSET ==================
-class AdminClientViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for Admin to manage (CRUD) Clients.
-    Only accessible to Admin users.
-    """
+    def perform_create(self, serializer):
+        user_id = self.request.data.get('user_id')
+        if not user_id:
+            raise ValidationError({'user_id': 'This field is required to create the record.'})
+
+        try:
+            user = SalesUser.objects.get(id=user_id)
+        except SalesUser.DoesNotExist:
+            raise ValidationError({'user_id': f'SalesUser with id={user_id} does not exist.'})
+
+        serializer.save(user=user)
+
+
+# ================== VIEWSETS USING BASE WITH USER ==================
+class AdminClientViewSet(AdminBaseUserLinkedViewSet):
     queryset = Client.objects.all().order_by('-created_at')
     serializer_class = ClientSerializer
-    permission_classes = [permissions.IsAdminUser]
-# ================== END ADMIN CLIENT VIEWSET ==================
 
 
-# ================== ADMIN PROJECT VIEWSET ==================
-class AdminProjectViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for Admin to manage (CRUD) Projects.
-    Only accessible to Admin users.
-    """
+class AdminProjectViewSet(AdminBaseUserLinkedViewSet):
     queryset = Project.objects.all().order_by('-created_at')
     serializer_class = ProjectSerializer
-    permission_classes = [permissions.IsAdminUser]
-# ================== END ADMIN PROJECT VIEWSET ==================
 
 
-# ================== ADMIN USER PROFILE VIEWSET ==================
-class AdminUserProfileViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for Admin to view Sales Users' profiles.
-    Only accessible to Admin users.
-    """
-    queryset = SalesUser.objects.all().order_by('-created_at')
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAdminUser]
-# ================== END ADMIN USER PROFILE VIEWSET ==================
-
-
-# ================== ADMIN BANK DETAIL VIEWSET ==================
-class AdminBankDetailViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for Admin to manage (CRUD) Bank Details.
-    Only accessible to Admin users.
-    """
+class AdminBankDetailViewSet(AdminBaseUserLinkedViewSet):
     queryset = BankDetail.objects.all().order_by('-created_at')
     serializer_class = BankDetailSerializer
-    permission_classes = [permissions.IsAdminUser]
-# ================== END ADMIN BANK DETAIL VIEWSET ==================
+
+
+class AdminBusinessDetailViewSet(AdminBaseUserLinkedViewSet):
+    queryset = BusinessDetail.objects.all().order_by('-created_at')
+    serializer_class = BusinessDetailSerializer
 
 
 # ================== ADMIN USER VIEWSET ==================
+
+
 class AdminUserViewSet(viewsets.ModelViewSet):
     """
     API endpoint for Admin to manage Sales Users.
@@ -155,46 +117,3 @@ class AdminUserViewSet(viewsets.ModelViewSet):
 
         return Response({"detail": "Access restored."}, status=status.HTTP_200_OK)
     # ========== END RESTORE ACCESS ACTION ==========
-
-#
-# class AdminClientUserViewSet(viewsets.ModelViewSet):
-#     queryset = Client.objects.all().order_by('-created_at')
-#     serializer_class = ClientSerializer
-#     permission_classes = [permissions.IsAdminUser]
-#
-#     @action(detail=False, methods=['get'])
-#     def by_user(self, request):
-#         user_id = request.query_params.get('user_id')
-#         if not user_id:
-#             return Response({'error': 'user_id is required'}, status=status.HTTP_400_BAD_REQUEST)
-#         clients = Client.objects.filter(user_id=user_id)
-#         serializer = self.get_serializer(clients, many=True)
-#         return Response(serializer.data)
-#
-#     def perform_create(self, serializer):
-#         user_id = self.request.data.get('user_id')
-#         if not user_id:
-#             raise serializers.ValidationError({'user_id': 'This field is required.'})
-#         serializer.save(user_id=user_id)
-#
-# # ✅ ADMIN BUSINESS DETAIL VIEWSET (slight correction needed in exception raising)
-# class AdminBusinessUserViewSet(viewsets.ModelViewSet):
-#     queryset = BusinessDetail.objects.all().order_by('-created_at')
-#     serializer_class = BusinessDetailSerializer
-#     permission_classes = [permissions.IsAdminUser]
-#
-#     @action(detail=False, methods=['get'])
-#     def by_user(self, request):
-#         user_id = request.query_params.get('user_id')
-#         if not user_id:
-#             return Response({'error': 'user_id is required'}, status=status.HTTP_400_BAD_REQUEST)
-#         businesses = BusinessDetail.objects.filter(user_id=user_id)
-#         serializer = self.get_serializer(businesses, many=True)
-#         return Response(serializer.data)
-#
-#     def perform_create(self, serializer):
-#         user_id = self.request.data.get('user_id')
-#         if not user_id:
-#             raise serializers.ValidationError({'user_id': 'This field is required.'})
-#         serializer.save(user_id=user_id)
-#

@@ -3,14 +3,13 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from .models import Invoice, InvoiceItem
+from rest_framework import status, filters
+from .models import Invoice
 from .serializers import InvoiceSerializer, InvoiceListSerializer
 import json
-from rest_framework import  filters
+from accounts.models import SalesUser  # ✅ Make sure this import is correct
 
 
-# ✅ Create - already done (keeping for context)
 class InvoiceCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -31,33 +30,47 @@ class InvoiceCreateView(APIView):
         }
         final_data["items"] = items
 
+        # ✅ Admin can create invoice on behalf of a user
+        if request.user.is_staff:
+            user_id = final_data.get('user_id')
+            if not user_id:
+                return Response({"user_id": "This field is required for admin."}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                user = SalesUser.objects.get(id=user_id)
+            except SalesUser.DoesNotExist:
+                return Response({"user_id": "SalesUser not found."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            user = request.user
+
         serializer = InvoiceSerializer(data=final_data, context={'request': request})
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            serializer.save(user=user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# ✅ Fetch single
 class InvoiceDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, invoice_id):
         try:
-            invoice = Invoice.objects.get(id=invoice_id, user=request.user)
+            invoice = Invoice.objects.get(id=invoice_id)
+            if not request.user.is_staff and invoice.user != request.user:
+                return Response({"error": "You do not have permission to view this invoice."}, status=status.HTTP_403_FORBIDDEN)
             serializer = InvoiceListSerializer(invoice)
             return Response(serializer.data)
         except Invoice.DoesNotExist:
             return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-# ✅ Update
 class InvoiceUpdateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, invoice_id):
         try:
-            invoice = Invoice.objects.get(id=invoice_id, user=request.user)
+            invoice = Invoice.objects.get(id=invoice_id)
+            if not request.user.is_staff and invoice.user != request.user:
+                return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
         except Invoice.DoesNotExist:
             return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -79,25 +92,24 @@ class InvoiceUpdateView(APIView):
 
         serializer = InvoiceSerializer(invoice, data=final_data, context={'request': request})
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            serializer.save(user=invoice.user)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# ✅ Delete by ID
 class InvoiceDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, invoice_id):
         try:
-            invoice = Invoice.objects.get(id=invoice_id, user=request.user)
+            invoice = Invoice.objects.get(id=invoice_id)
+            if not request.user.is_staff and invoice.user != request.user:
+                return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
             invoice.delete()
             return Response({"success": "Invoice deleted"}, status=status.HTTP_204_NO_CONTENT)
         except Invoice.DoesNotExist:
             return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
 
-
-# ✅ List all
 
 class InvoiceListView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -107,4 +119,6 @@ class InvoiceListView(ListAPIView):
     search_fields = ['invoice_number']
 
     def get_queryset(self):
+        if self.request.user.is_staff:
+            return Invoice.objects.all().order_by('-created_at')
         return Invoice.objects.filter(user=self.request.user).order_by('-created_at')

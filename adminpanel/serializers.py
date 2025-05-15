@@ -28,17 +28,6 @@ class BusinessDetailSerializer(serializers.ModelSerializer):
         model = BusinessDetail
         fields = '__all__'
 
-class InvoiceSerializer(serializers.ModelSerializer):
-    user = ProfileSerializer(read_only=True)
-    class Meta:
-        model = Invoice
-        fields = '__all__'
-
-class InvoiceItemSerializer(serializers.ModelSerializer):
-    user = ProfileSerializer(read_only=True)
-    class Meta:
-        model = InvoiceItem
-        fields = '__all__'
 
 
 class ClientSerializer(serializers.ModelSerializer):
