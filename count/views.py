@@ -9,6 +9,7 @@ from invoice.models import Invoice
 from clients.models import Client
 from projects.models import Project
 
+
 class DataCountView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -28,7 +29,11 @@ class DataCountView(APIView):
         if not model_class:
             return Response({'error': 'Invalid model name.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # assuming all models have a 'user' ForeignKey field
-        count = model_class.objects.filter(user=request.user).count()
+        # If user is admin/superuser, return total count
+        if request.user.is_staff or request.user.is_superuser:
+            count = model_class.objects.all().count()
+        else:
+            # Assume all models have a `user` field
+            count = model_class.objects.filter(user=request.user).count()
 
         return Response({'module': model_name, 'count': count})
