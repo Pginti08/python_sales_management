@@ -30,17 +30,8 @@ class InvoiceCreateView(APIView):
         }
         final_data["items"] = items
 
-        # ✅ Admin can create invoice on behalf of a user
-        if request.user.is_staff:
-            user_id = final_data.get('user_id')
-            if not user_id:
-                return Response({"user_id": "This field is required for admin."}, status=status.HTTP_400_BAD_REQUEST)
-            try:
-                user = SalesUser.objects.get(id=user_id)
-            except SalesUser.DoesNotExist:
-                return Response({"user_id": "SalesUser not found."}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            user = request.user
+        # Remove admin override for user_id: only create for self
+        user = request.user
 
         serializer = InvoiceSerializer(data=final_data, context={'request': request})
         if serializer.is_valid():
@@ -49,12 +40,14 @@ class InvoiceCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class InvoiceDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, invoice_id):
         try:
             invoice = Invoice.objects.get(id=invoice_id)
+            # Admin can access all, user only own
             if not request.user.is_staff and invoice.user != request.user:
                 return Response({"error": "You do not have permission to view this invoice."}, status=status.HTTP_403_FORBIDDEN)
             serializer = InvoiceListSerializer(invoice)
@@ -103,13 +96,14 @@ class InvoiceDeleteView(APIView):
     def delete(self, request, invoice_id):
         try:
             invoice = Invoice.objects.get(id=invoice_id)
-            if not request.user.is_staff and invoice.user != request.user:
-                return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
-            invoice.delete()
-            return Response({"success": "Invoice deleted"}, status=status.HTTP_204_NO_CONTENT)
         except Invoice.DoesNotExist:
             return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
 
+        if not request.user.is_staff and invoice.user != request.user:
+            return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+
+        invoice.delete()
+        return Response({"success": "Invoice deleted"}, status=status.HTTP_204_NO_CONTENT)
 
 class InvoiceListView(ListAPIView):
     permission_classes = [IsAuthenticated]

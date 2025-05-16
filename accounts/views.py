@@ -139,9 +139,21 @@ class ResetPasswordView(APIView):
 # -----------------------------
 # ✅ Profile View (Retrieve, Update, Delete)
 # -----------------------------
+
+class AdminUserListView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAdminUser]  # Only admins can access
+    queryset = User.objects.all()
+
+
 class SalesUserProfileRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'pk'
 
-    def get_object(self):
-        return self.request.user
+    def get_queryset(self):
+        # Admins can access all users
+        if self.request.user.is_staff:
+            return User.objects.all()
+        # Normal users can only access their own data
+        return User.objects.filter(pk=self.request.user.pk)

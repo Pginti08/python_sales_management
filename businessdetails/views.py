@@ -1,15 +1,13 @@
-# Importing generic views and permission classes from DRF
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, permissions, status, filters
 from rest_framework.decorators import api_view
-from django.db import IntegrityError
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 
-# Importing the BusinessDetail model and its serializer
 from businessdetails.models import BusinessDetail, TeamSize
 from businessdetails.serializers import BusinessDetailSerializer, TeamSizeSerializer
-
+from accounts.models import SalesUser  # replace this with your actual user model
 
 @csrf_exempt
 @api_view(['GET', 'POST'])
@@ -26,32 +24,35 @@ def team_size_create(request):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
+
+# ✅ BusinessDetail list & create view
 class BusinessDetailListCreateView(generics.ListCreateAPIView):
     serializer_class = BusinessDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
 
-    # ✅ These fields are used for filtering and searching
     filterset_fields = ['country', 'state']
     search_fields = ['business_name', 'phone']
 
     def get_queryset(self):
+        if self.request.user.is_staff:
+            return BusinessDetail.objects.all().order_by('-created_at')
         return BusinessDetail.objects.filter(user=self.request.user).order_by('-created_at')
 
     def perform_create(self, serializer):
+        if self.request.user.is_staff:
+            # Admins cannot create bank details
+            raise PermissionDenied("Admin users cannot create Business details.")
         serializer.save(user=self.request.user)
 
-# -----------------------------
-# ✅ View to Retrieve, Update, and Delete Business Detail by ID
-# -----------------------------
-class BusinessDetailRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    # Use the same serializer
-    serializer_class = BusinessDetailSerializer
 
-    # Only logged-in users can access this view
+# ✅ BusinessDetail retrieve/update/delete view
+
+class BusinessDetailRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = BusinessDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    # Again, filter the queryset so users can only access their own data
     def get_queryset(self):
+        if self.request.user.is_staff:
+            return BusinessDetail.objects.all()
         return BusinessDetail.objects.filter(user=self.request.user)
-
