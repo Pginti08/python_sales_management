@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from accounts.serializers import ProfileSerializer
 from .models import Project
 import time
 
@@ -15,6 +17,7 @@ class DocumentGroupSerializer(serializers.Serializer):
     link2 = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
 class ProjectSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
     live_links = LinkGroupSerializer(required=False)
     repo_links = LinkGroupSerializer(required=False)
     documents = DocumentGroupSerializer(required=False)
@@ -23,6 +26,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = '__all__'
         read_only_fields = ['user', 'created_at', 'updated_at']
+
+    def get_user(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_staff:
+            return ProfileSerializer(obj.user, context=self.context).data
+        return obj.user.id if obj.user else None
 
     def validate_developer_name(self, value):
         if not isinstance(value, list) or not all(isinstance(name, str) for name in value):

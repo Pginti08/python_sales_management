@@ -3,71 +3,14 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from accounts.models import SalesUser
-
-from bankdetails.models import BankDetail
-from businessdetails.models import BusinessDetail
-from invoice.models import Invoice, InvoiceItem
-from clients.models import Client
-from projects.models import Project
 from rest_framework.response import Response
-
 from accounts.serializers import ProfileSerializer
 from .serializers import (
-    BankDetailSerializer,
-    BusinessDetailSerializer,
-     ClientSerializer,
-    ProjectSerializer, UserSerializer,
+    UserSerializer,
 )
-
-
-# ================== BASE ADMIN VIEWSET ==================
-class AdminBaseUserLinkedViewSet(viewsets.ModelViewSet):
-    """
-    Base ViewSet for models linked to SalesUser (user field).
-    Admin can perform full CRUD and assign user_id during creation.
-    """
-    permission_classes = [permissions.IsAdminUser]
-
-    def perform_create(self, serializer):
-        user_id = self.request.data.get('user_id')
-        if not user_id:
-            raise ValidationError({'user_id': 'This field is required to create the record.'})
-
-        try:
-            user = SalesUser.objects.get(id=user_id)
-        except SalesUser.DoesNotExist:
-            raise ValidationError({'user_id': f'SalesUser with id={user_id} does not exist.'})
-
-        serializer.save(user=user)
-
-
-# ================== VIEWSETS USING BASE WITH USER ==================
-class AdminClientViewSet(AdminBaseUserLinkedViewSet):
-    queryset = Client.objects.all().order_by('-created_at')
-    serializer_class = ClientSerializer
-
-
-class AdminProjectViewSet(AdminBaseUserLinkedViewSet):
-    queryset = Project.objects.all().order_by('-created_at')
-    serializer_class = ProjectSerializer
-
-
-class AdminBankDetailViewSet(AdminBaseUserLinkedViewSet):
-    queryset = BankDetail.objects.all().order_by('-created_at')
-    serializer_class = BankDetailSerializer
-
-
-class AdminBusinessDetailViewSet(AdminBaseUserLinkedViewSet):
-    queryset = BusinessDetail.objects.all().order_by('-created_at')
-    serializer_class = BusinessDetailSerializer
-
-
-# ================== ADMIN USER VIEWSET ==================
-
 
 class AdminUserViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for Admin to manage Sales Users.
     Admin can revoke or restore user access using custom actions.
     """
     queryset = SalesUser.objects.all()

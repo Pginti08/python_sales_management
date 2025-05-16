@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from accounts.serializers import ProfileSerializer
 from bankdetails.models import BankDetail
 from bankdetails.serializers import BankDetailSerializer
 from businessdetails.models import BusinessDetail
@@ -89,6 +90,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         return instance
 
 class InvoiceListSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
     country = CountrySerializer(read_only=True)
     client = ClientSerializer(read_only=True)
     business = BusinessDetailSerializer(read_only=True)
@@ -98,6 +100,7 @@ class InvoiceListSerializer(serializers.ModelSerializer):
         model = Invoice
         fields = [
             'id',
+            'user',
             'invoice_number',
             'invoice_date',
             'due_date',
@@ -109,3 +112,10 @@ class InvoiceListSerializer(serializers.ModelSerializer):
             'status',
             'items'
         ]
+    def get_user(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_staff:
+            # ✅ Admin sees full profile
+            return ProfileSerializer(obj.user, context=self.context).data
+        # ✅ Normal user sees just the ID
+        return obj.user.id if obj.user else None
