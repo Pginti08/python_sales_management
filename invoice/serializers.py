@@ -1,3 +1,4 @@
+from django.core.files.uploadedfile import UploadedFile
 from rest_framework import serializers
 
 from accounts.serializers import ProfileSerializer
@@ -45,6 +46,17 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'invoice_logo',
         ]
         read_only_fields = ['user', 'id']
+
+    def validate_invoice_logo(self, value):
+        # Case 1: empty string or invalid file
+        if value in [None, '', 'null']:
+            raise serializers.ValidationError("File cannot be empty.")
+
+        # Case 2: sometimes DRF still passes a non-file string
+        if not isinstance(value, UploadedFile):
+            raise serializers.ValidationError("File cannot be empty.")
+
+        return value
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

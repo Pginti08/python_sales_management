@@ -17,7 +17,12 @@ class Invoice(models.Model):
     invoice_date = models.DateField()
     due_date = models.DateField()
     status = models.CharField(max_length=100, default='draft')
-    invoice_logo = models.ImageField(upload_to='invoices/logos/', default='unknown')
+    invoice_logo = models.FileField(
+        upload_to='invoice_logos/',
+        null=True,
+        blank=True,
+        default='unknown'  # Or a default path like 'default/logo.png'
+    )
     created_at = models.DateTimeField(auto_now=True)  # auto_now_add is fine here
     updated_at = models.DateTimeField(auto_now=True)
 
