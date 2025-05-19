@@ -7,7 +7,7 @@ from .views import (
     SendResetEmailView,
     ResetPasswordByEmailView,
     ResetPasswordView,
-    SalesUserProfileRetrieveUpdateDestroyView, AdminUserListView
+    SalesUserProfileRetrieveUpdateDestroyView, AdminUserListView, AdminUserProfileView, SelfUserProfileView
 )
 
 urlpatterns = [
@@ -18,7 +18,8 @@ urlpatterns = [
     path('auth-send-reset-email/', SendResetEmailView.as_view(), name='send-reset-email'),
     path('reset-password-by-email/', ResetPasswordByEmailView.as_view(), name='reset-password-email'),
     path('reset_password/', ResetPasswordView.as_view(), name='reset-password'),
-    path('admin/Users/', AdminUserListView.as_view(), name='profile-list'),
-    path('user/<int:pk>/', SalesUserProfileRetrieveUpdateDestroyView.as_view(), name='profile-detail'),
+    path('admin/users/', AdminUserListView.as_view(), name='admin-user-list'),
+    path('admin/user/<int:pk>/', AdminUserProfileView.as_view(), name='admin-user-detail'),
+    path('user/', SelfUserProfileView.as_view(), name='self-user-profile'),
 
 ]

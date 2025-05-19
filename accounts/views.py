@@ -157,3 +157,16 @@ class SalesUserProfileRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAP
             return User.objects.all()
         # Normal users can only access their own data
         return User.objects.filter(pk=self.request.user.pk)
+
+class SelfUserProfileView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+class AdminUserProfileView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAdminUser]
+    queryset = User.objects.all()
+    lookup_field = 'pk'
