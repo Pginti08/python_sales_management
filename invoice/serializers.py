@@ -14,7 +14,18 @@ from common_country_module.models import Country
 from common_country_module.serializers import CountrySerializer
 
 from .models import Invoice, InvoiceItem
+from rest_framework.fields import FileField
+from rest_framework.exceptions import ValidationError
 
+class SafeFileField(FileField):
+    def to_internal_value(self, data):
+        if data in ['', None, 'null']:
+            return 'unknown'  # allow empty input without throwing error
+
+        try:
+            return super().to_internal_value(data)
+        except ValidationError:
+            raise ValidationError("Please upload a valid file.")
 
 class InvoiceItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,6 +40,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         allow_null=True
     )
     items = InvoiceItemSerializer(many=True, required=True)
+    invoice_logo = SafeFileField(required=False, allow_null=True)
     class Meta:
         model = Invoice
         fields = [
@@ -47,16 +59,6 @@ class InvoiceSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['user', 'id']
 
-    def validate_invoice_logo(self, value):
-        # Case 1: empty string or invalid file
-        if value in [None, '', 'null']:
-            raise serializers.ValidationError("File cannot be empty.")
-
-        # Case 2: sometimes DRF still passes a non-file string
-        if not isinstance(value, UploadedFile):
-            raise serializers.ValidationError("File cannot be empty.")
-
-        return value
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
